@@ -1,12 +1,3 @@
-// Project owned and developed by NoviumNodes
-
-const savedTheme = localStorage.getItem('pb_vanilla_theme') || 'dark';
-if (savedTheme === 'light') {
-  document.documentElement.classList.remove('dark');
-} else {
-  document.documentElement.classList.add('dark');
-}
-
 const DEFAULT_SEED_TRANSACTIONS = [
   { id: 'seed-1', type: 'income', amount: 54000.00, reason: 'Staff Consultancy Payout', personName: 'Arab Lab Corp', category: 'freelance', date: '2026-06-15' },
   { id: 'seed-2', type: 'expense', amount: 14500.00, reason: 'Monthly Office Rental', personName: 'Self Managed', category: 'housing', date: '2026-06-16' },
@@ -18,206 +9,145 @@ const DEFAULT_SEED_TRANSACTIONS = [
 const CATEGORIES = {
   income: [
     { value: 'salary', label: 'Fixed Salary Source', icon: 'wallet' },
-    { value: 'freelance', label: 'Freelance & Contracting', icon: 'briefcase' },
-    { value: 'investment', label: 'Dividends & Assets', icon: 'trending-up' },
-    { value: 'other_income', label: 'Miscellaneous Inflow', icon: 'plus-circle' }
+    { value: 'freelance', label: 'Freelance & Contract', icon: 'briefcase' },
+    { value: 'investment', label: 'Dividends & Yields', icon: 'trending-up' },
+    { value: 'other_income', label: 'Other Gift Cashflow', icon: 'plus-circle' }
   ],
   expense: [
-    { value: 'housing', label: 'Housing & Operational Rent', icon: 'home' },
-    { value: 'groceries', label: 'Essential Food & Groceries', icon: 'shopping-cart' },
-    { value: 'utilities', label: 'Energy, Net & Water Utilities', icon: 'zap' },
-    { value: 'transport', label: 'Transport & Fleet Logistics', icon: 'truck' },
-    { value: 'eating_out', label: 'Eating Out & Catering', icon: 'coffee' },
-    { value: 'comfort', label: 'Lifestyle, Leisure & Comfort', icon: 'smile' },
-    { value: 'other_expense', label: 'Unforeseen Outward Debit', icon: 'minus-circle' }
+    { value: 'groceries', label: 'Foods & Groceries', icon: 'shopping-cart' },
+    { value: 'housing', label: 'Housing Rent & Utility Bills', icon: 'home' },
+    { value: 'transport', label: 'Logistics, Commutes & Transport', icon: 'car' },
+    { value: 'entertainment', label: 'Entertainment & Leisure', icon: 'activity' },
+    { value: 'eating_out', label: 'Dining Out, Cafes & Cuisines', icon: 'coffee' },
+    { value: 'other_expense', label: 'Unclassified Miscellaneous Spend', icon: 'minus-circle' }
   ]
+};
+
+const CATEGORY_ICONS = {
+  // Income
+  salary: `<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 00-2-2h-2" /></svg>`,
+  freelance: `<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="7" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  investment: `<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 7l-8.5 8.5-5-5L2 18M22 7h-6M22 7v6"/></svg>`,
+  other_income: `<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8M8 12h8"/></svg>`,
+
+  // Expenses
+  groceries: `<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.05 2.05h2l2.66 12.42a2 2 0 002 1.58h9.78a2 2 0 001.95-1.57l1.65-7.43H5.12"/></svg>`,
+  housing: `<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 22V12h6v10"/></svg>`,
+  transport: `<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 002 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>`,
+  entertainment: `<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`,
+  eating_out: `<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>`,
+  other_expense: `<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h8"/></svg>`
 };
 
 let state = {
   transactions: [],
-  formType: 'expense',
+  formType: 'income',
   chartTab: 'expense',
   filterType: 'all',
   searchTerm: ''
 };
 
-function initApp() {
+window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('form-date').value = getTodayIsoDate();
   document.getElementById('header-date-tag').innerText = getTodayIsoDate();
   initTheming();
-  loadStateFromCache();
-  setFormType('expense');
+  initLedgerRecords();
+});
+
+function getTodayIsoDate() {
+  const today = new Date();
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+}
+
+function initTheming() {
+  const savedTheme = localStorage.getItem('pb_vanilla_theme') || 'dark';
+  if (savedTheme === 'light') { setLightMode(); } else { setDarkMode(); }
+  document.getElementById('btn-theme-switcher').addEventListener('click', () => {
+    if (document.documentElement.classList.contains('dark')) { setLightMode(); } else { setDarkMode(); }
+  });
+}
+
+function setDarkMode() {
+  document.documentElement.classList.add('dark');
+  localStorage.setItem('pb_vanilla_theme', 'dark');
+  document.getElementById('theme-sun-icon').classList.remove('hidden');
+  document.getElementById('theme-moon-icon').classList.add('hidden');
+}
+
+function setLightMode() {
+  document.documentElement.classList.remove('dark');
+  localStorage.setItem('pb_vanilla_theme', 'light');
+  document.getElementById('theme-sun-icon').classList.add('hidden');
+  document.getElementById('theme-moon-icon').classList.remove('hidden');
+}
+
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = `pointer-events-auto toast-enter toast-${type}`;
+  toast.innerHTML = `${type === 'success' ? '<svg class="w-4.5 h-4.5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>' : type === 'error' ? '<svg class="w-4.5 h-4.5 text-rose-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>' : '<svg class="w-4.5 h-4.5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.083 1.083l-.041.02-.041-.02a.75.75 0 01-1.083-1.083l.041-.02zM12 21a9 9 0 100-18 9 9 0 000 18z"/></svg>'} <span class="flex-1">${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.remove('toast-enter');
+    toast.classList.add('toast-active');
+  }, 10);
+  setTimeout(() => {
+    toast.classList.remove('toast-active');
+    toast.classList.add('toast-exit');
+    setTimeout(() => toast.remove(), 400);
+  }, 4000);
+}
+
+function initLedgerRecords() {
+  const cached = localStorage.getItem('pb_vanilla_transactions');
+  if (cached) { try { state.transactions = JSON.parse(cached); } catch (e) { state.transactions = [...DEFAULT_SEED_TRANSACTIONS]; saveStateToCache(); } } 
+  else { state.transactions = [...DEFAULT_SEED_TRANSACTIONS]; saveStateToCache(); }
+  renderCategoriesDropdown();
+  setFormType('income');
   setChartTab('expense');
   setFilterType('all');
   updateDashboardData();
 }
 
-if (document.readyState === 'loading') {
-  window.addEventListener('DOMContentLoaded', initApp);
-} else {
-  initApp();
-}
+function saveStateToCache() { localStorage.setItem('pb_vanilla_transactions', JSON.stringify(state.transactions)); }
 
-function getTodayIsoDate() {
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  let mm = today.getMonth() + 1;
-  let dd = today.getDate();
-  if (mm < 10) mm = '0' + mm;
-  if (dd < 10) dd = '0' + dd;
-  return `${yyyy}-${mm}-${dd}`;
-}
-
-function initTheming() {
-  const btn = document.getElementById('theme-toggle');
-  if (!btn) return;
-  updateThemeUi();
-  btn.addEventListener('click', () => {
-    if (document.documentElement.classList.contains('dark')) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('pb_vanilla_theme', 'light');
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('pb_vanilla_theme', 'dark');
-    }
-    updateThemeUi();
-  });
-}
-
-function updateThemeUi() {
-  const icon = document.getElementById('theme-toggle-icon');
-  if (!icon) return;
-  const isDark = document.documentElement.classList.contains('dark');
-  if (isDark) {
-    icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />`;
+function updateAdvisoryWarning(balance, netIncome, netExpense) {
+  const banner = document.getElementById('advisor-banner');
+  const badge = document.getElementById('advisor-badge');
+  const text = document.getElementById('advisor-text');
+  const title = document.getElementById('advisor-title');
+  if (!banner || !badge || !text || !title) return;
+  if (balance < 0) {
+    banner.className = "mb-8 p-4 rounded-3xl border bg-rose-50/80 border-rose-200 dark:bg-rose-950/15 dark:border-rose-900/40 text-rose-800 dark:text-rose-200 theme-transition shadow-sm flex items-start gap-4";
+    badge.className = "p-2 rounded-2xl shrink-0 mt-0.5 border bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400";
+    title.innerText = "Budget Risk Advisory";
+    text.innerHTML = `⚠️ Deficit detected: Expenses outstrip income by <strong class="font-mono font-bold text-sm">${formatCurrency(Math.abs(balance))}</strong>. Review categorized items to trim spends.`;
+  } else if (balance === 0) {
+    banner.className = "mb-8 p-4 rounded-3xl border bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 theme-transition shadow-sm flex items-start gap-4";
+    badge.className = "p-2 rounded-2xl shrink-0 mt-0.5 border bg-zinc-500/10 border-zinc-500/20 text-zinc-500 dark:text-zinc-400";
+    title.innerText = "Flat Liquid Advisory";
+    text.innerHTML = `⚖️ Cashflow is perfectly flat. Offsets perfectly balance incoming and outgoing items.`;
   } else {
-    icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />`;
-  }
-}
-
-function loadStateFromCache() {
-  try {
-    const serialized = localStorage.getItem('pb_vanilla_transactions');
-    if (serialized) {
-      state.transactions = JSON.parse(serialized);
-    } else {
-      state.transactions = [...DEFAULT_SEED_TRANSACTIONS];
-      saveStateToCache();
-    }
-  } catch (err) {
-    state.transactions = [...DEFAULT_SEED_TRANSACTIONS];
-  }
-}
-
-function saveStateToCache() {
-  try {
-    localStorage.setItem('pb_vanilla_transactions', JSON.stringify(state.transactions));
-  } catch (err) {
-    console.error('Failed Cache Write:', err);
+    banner.className = "mb-8 p-4 rounded-3xl border bg-emerald-50/80 border-emerald-200 dark:bg-emerald-950/10 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-300 theme-transition shadow-sm flex items-start gap-4";
+    badge.className = "p-2 rounded-2xl shrink-0 mt-0.5 border bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400";
+    title.innerText = "Ledger Inflows Healthy";
+    text.innerHTML = `🎉 Active surplus holding: <strong class="font-mono font-bold text-sm">${formatCurrency(balance)}</strong> left over. Export backup ledger arrays regularly to store safely.`;
   }
 }
 
 function updateDashboardData() {
-  let income = 0;
-  let expenses = 0;
-  state.transactions.forEach(t => {
-    const amt = Number(t.amount);
-    if (t.type === 'income') income += amt;
-    else expenses += amt;
-  });
+  let income = 0, expenses = 0;
+  state.transactions.forEach(t => { if (t.type === 'income') income += Number(t.amount); else expenses += Number(t.amount); });
   const balance = income - expenses;
-  let pct = 0;
-  if (income > 0) {
-    pct = Math.min(100, Math.max(0, (balance / income) * 100));
-  }
-  document.getElementById('savings-percent-display').innerText = `${pct.toFixed(0)}%`;
+  const pct = income > 0 ? Math.max(0, Math.min(100, (balance / income) * 100)) : 0;
   document.getElementById('total-income-display').innerText = formatCurrency(income);
   document.getElementById('total-expenses-display').innerText = formatCurrency(expenses);
   document.getElementById('total-balance-display').innerText = (balance < 0 ? '-' : '') + formatCurrency(Math.abs(balance));
   if (document.getElementById('savings-progress-bar')) document.getElementById('savings-progress-bar').style.width = `${balance < 0 ? 0 : pct}%`;
-  
-  // Minimize container content and shrink font sizes when numbers exceed standard widths
-  adjustCardContent('card-total-income', 'total-income-display', income);
-  adjustCardContent('card-total-expenses', 'total-expenses-display', expenses);
-  adjustCardContent('card-total-balance', 'total-balance-display', balance);
-
   updateAdvisoryWarning(balance, income, expenses);
   renderLedgerTransactions();
   renderCategoryAnalytics();
-}
-
-function adjustCardContent(cardId, displayId, value) {
-  const card = document.getElementById(cardId);
-  const display = document.getElementById(displayId);
-  if (!card || !display) return;
-  
-  const absVal = Math.abs(value);
-  const numStr = Math.round(absVal).toString();
-  const len = numStr.length;
-  
-  // Reset card padding classes
-  card.classList.remove('p-6', 'p-5', 'p-4', 'p-3.5');
-  
-  // Reset display text size and tracking classes
-  display.classList.remove(
-    'text-3xl', 'text-2xl', 'text-xl', 'text-lg', 'text-base', 'text-sm', 'text-xs',
-    'tracking-widest', 'tracking-wider', 'tracking-normal', 'tracking-tight', 'tracking-tighter'
-  );
-  
-  // Locate card elements to minimize
-  const svg = card.querySelector('svg');
-  const subtext = card.querySelector('p.text-\\[10px\\]') || card.querySelector('p:last-of-type');
-  const progressBarWrapper = card.querySelector('.mt-4') || card.querySelector('.mt-3') || card.querySelector('.mt-2');
-  
-  if (svg) {
-    svg.classList.remove('hidden', 'w-12', 'h-12', 'w-10', 'h-10', 'w-8', 'h-8', 'w-6', 'h-6');
-  }
-  if (subtext) {
-    subtext.classList.remove('hidden', 'mt-2.5', 'mt-2', 'mt-1.5');
-  }
-  if (progressBarWrapper) {
-    progressBarWrapper.classList.remove('hidden', 'mt-4', 'mt-3', 'mt-2');
-  }
-  
-  if (len >= 9) { // 100 Million+ or extremely long numbers
-    card.classList.add('p-3.5');
-    display.classList.add('text-xs', 'tracking-tighter');
-    if (svg) svg.classList.add('hidden');
-    if (subtext) subtext.classList.add('hidden');
-    if (progressBarWrapper) progressBarWrapper.classList.add('hidden');
-  } else if (len >= 7) { // 1 Million+
-    card.classList.add('p-4');
-    display.classList.add('text-sm', 'tracking-tighter');
-    if (svg) svg.classList.add('hidden');
-    if (subtext) subtext.classList.add('hidden');
-    if (progressBarWrapper) {
-      progressBarWrapper.classList.add('mt-2');
-    }
-  } else if (len >= 5) { // 10,000+
-    card.classList.add('p-4');
-    display.classList.add('text-base', 'tracking-tighter');
-    if (svg) svg.classList.add('w-8', 'h-8');
-    if (subtext) subtext.classList.add('mt-1.5');
-    if (progressBarWrapper) {
-      progressBarWrapper.classList.add('mt-2');
-    }
-  } else if (len >= 4) { // 1,000+
-    card.classList.add('p-5');
-    display.classList.add('text-xl', 'tracking-tight');
-    if (svg) svg.classList.add('w-10', 'h-10');
-    if (subtext) subtext.classList.add('mt-2');
-    if (progressBarWrapper) {
-      progressBarWrapper.classList.add('mt-3');
-    }
-  } else { // Small numbers, standard display
-    card.classList.add('p-6');
-    display.classList.add('text-3xl');
-    if (svg) svg.classList.add('w-12', 'h-12');
-    if (subtext) subtext.classList.add('mt-2.5');
-    if (progressBarWrapper) {
-      progressBarWrapper.classList.add('mt-4');
-    }
-  }
 }
 
 function formatCurrency(val) { return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EGP' }).format(val); }
@@ -331,9 +261,10 @@ function renderLedgerTransactions() {
   }
   filtered.forEach(t => {
     const isIncome = t.type === 'income', catDetails = (CATEGORIES[t.type] || []).find(c => c.value === t.category) || { label: t.category };
+    const iconSvg = CATEGORY_ICONS[t.category] || (isIncome ? '<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>' : '<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>');
     const row = document.createElement('div');
-    row.className = "group flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-zinc-50 border border-zinc-150 dark:bg-zinc-950 dark:border-zinc-850 rounded-2xl hover:border-indigo-500 transition-all duration-300 gap-4 shadow-sm";
-    row.innerHTML = `<div class="flex items-start gap-3.5"><div class="p-2.5 rounded-xl shrink-0 mt-0.5 border ${isIncome ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'}">${isIncome ? '<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>' : '<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>'}</div><div class="space-y-1.5 min-w-0 pr-2"><h4 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 break-words text-left">${t.reason}</h4><div class="flex flex-wrap items-center gap-2 text-[8px] uppercase font-bold text-zinc-400 dark:text-zinc-500"><span class="font-mono">${t.date}</span><span class="h-1 w-1 rounded-full bg-zinc-300 dark:bg-zinc-700"></span><span class="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400">${catDetails.label}</span>${t.personName ? `<span class="h-1 w-1 rounded-full bg-zinc-300 dark:bg-zinc-700"></span><span class="px-2 py-0.5 rounded bg-indigo-500/5 dark:bg-indigo-950/20 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 max-w-[130px] truncate">${t.personName}</span>` : ''}</div></div></div><div class="flex items-center justify-between sm:justify-end gap-5 border-t sm:border-t-0 border-zinc-200 dark:border-zinc-850 pt-3 sm:pt-0"><span class="text-sm sm:text-base font-extrabold font-mono shrink-0 ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}">${isIncome ? '+' : '-'}${formatCurrency(t.amount)}</span><button type="button" onclick="deleteTransactionEntry('${t.id}')" class="p-2 text-zinc-400 hover:text-rose-500 dark:hover:bg-rose-500/10 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer focus:outline-none"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div>`;
+    row.className = "group flex flex-col sm:flex-row sm:items-center md:flex-col md:items-stretch lg:flex-col lg:items-stretch xl:flex-row xl:items-center justify-between p-4 bg-zinc-50 border border-zinc-150 dark:bg-zinc-950 dark:border-zinc-855 rounded-2xl hover:border-indigo-500 transition-all duration-300 gap-4 shadow-sm";
+    row.innerHTML = `<div class="flex items-start gap-3.5"><div class="p-2.5 rounded-xl shrink-0 mt-0.5 border ${isIncome ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'}">${iconSvg}</div><div class="space-y-1.5 min-w-0 pr-2"><h4 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 break-words text-left">${t.reason}</h4><div class="flex flex-wrap items-center gap-2 text-[8px] uppercase font-bold text-zinc-400 dark:text-zinc-500"><span class="font-mono">${t.date}</span><span class="h-1 w-1 rounded-full bg-zinc-300 dark:bg-zinc-700"></span><span class="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400">${catDetails.label}</span>${t.personName ? `<span class="h-1 w-1 rounded-full bg-zinc-300 dark:bg-zinc-700"></span><span class="px-2 py-0.5 rounded bg-indigo-500/5 dark:bg-indigo-950/20 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 max-w-[130px] truncate">${t.personName}</span>` : ''}</div></div></div><div class="flex items-center justify-between sm:justify-end md:justify-between lg:justify-between xl:justify-end gap-5 border-t sm:border-t-0 md:border-t lg:border-t xl:border-t-0 border-zinc-200 dark:border-zinc-850 pt-3 sm:pt-0 md:pt-3 lg:pt-3 xl:pt-0"><span class="text-sm sm:text-base font-extrabold font-mono shrink-0 ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}">${isIncome ? '+' : '-'}${formatCurrency(t.amount)}</span><button type="button" onclick="deleteTransactionEntry('${t.id}')" class="p-2 text-zinc-400 hover:text-rose-500 dark:hover:bg-rose-500/10 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer focus:outline-none"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div>`;
     container.appendChild(row);
   });
 }
@@ -375,63 +306,3 @@ function handleExportBackup() {
   document.body.appendChild(element); element.click(); document.body.removeChild(element);
   showToast('Successfully exported backup file.', 'success');
 }
-
-function updateAdvisoryWarning(balance, income, expenses) {
-  const bar = document.getElementById('advisory-warning-bar'), text = document.getElementById('advisory-warning-text');
-  if (!bar || !text) return;
-  if (income > 0 && expenses > income) {
-    text.innerText = `Danger! Current aggregated expenses (${formatCurrency(expenses)}) exceed Gross Incomes (${formatCurrency(income)}) by ${formatCurrency(expenses - income)}. Avoid non-essential outflows to safeguard treasury liquidity.`;
-    bar.classList.remove('hidden');
-  } else if (income > 0 && (expenses / income) >= 0.85) {
-    text.innerText = `Warning: High leverage ratio detected. Outflows exceed 85% of Gross Incomes. Maintain tight budget limits to prevent asset stagnation.`;
-    bar.classList.remove('hidden');
-  } else {
-    bar.classList.add('hidden');
-  }
-}
-
-function showToast(message, type = 'info') {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-  const toast = document.createElement('div');
-  toast.className = `transform translate-y-2 opacity-0 pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl border text-xs font-bold shadow-xl transition-all duration-300 ${
-    type === 'success' ? 'bg-emerald-500/10 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-500/25' :
-    type === 'error' ? 'bg-rose-500/10 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border-rose-500/25' :
-    'bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800'
-  }`;
-  
-  let iconSvg = '';
-  if (type === 'success') iconSvg = '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-  else if (type === 'error') iconSvg = '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
-  else iconSvg = '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"></path></svg>';
-
-  toast.innerHTML = `${iconSvg}<span>${message}</span>`;
-  container.appendChild(toast);
-  
-  // Transition in
-  setTimeout(() => {
-    toast.classList.remove('translate-y-2', 'opacity-0');
-    toast.classList.add('translate-y-0', 'opacity-100');
-  }, 50);
-
-  // Transition out and destroy
-  setTimeout(() => {
-    toast.classList.remove('translate-y-0', 'opacity-100');
-    toast.classList.add('translate-y-2', 'opacity-0');
-    setTimeout(() => toast.remove(), 300);
-  }, 4000);
-}
-
-// Bind handlers to window to ensure global availability across execution and compilation boundaries
-window.setFormType = setFormType;
-window.handleFormSubmit = handleFormSubmit;
-window.deleteTransactionEntry = deleteTransactionEntry;
-window.clearAllTransactions = clearAllTransactions;
-window.triggerBackupFilePicker = triggerBackupFilePicker;
-window.handleImportBackup = handleImportBackup;
-window.handleExportBackup = handleExportBackup;
-window.setChartTab = setChartTab;
-window.setFilterType = setFilterType;
-window.handleSearchFilterInput = handleSearchFilterInput;
-window.showClearConfirmation = showClearConfirmation;
-window.showToast = showToast;
